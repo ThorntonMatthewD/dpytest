@@ -155,8 +155,6 @@ class FakeHttp(dhttp.HTTPClient):
         locs = _get_higher_locs(1)
         channel = locs.get("channel", None)
 
-        print(f"meow: {params.payload.get('embeds')}")
-
         embeds = []
         if params.payload.get('embeds'):
             for e in params.payload.get('embeds'):
