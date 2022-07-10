@@ -19,6 +19,7 @@ import pathlib
 import urllib.parse
 import urllib.request
 
+from discord.types.snowflake import Snowflake
 from . import factories as facts, state as dstate, callbacks, websocket, _types
 
 
@@ -146,22 +147,20 @@ class FakeHttp(dhttp.HTTPClient):
         return facts.make_dm_channel_dict(user)
 
     async def send_message(
-            self,
-            channel_id: int,
-            content: str,
-            *,
-            tts: bool = False,
-            embed: typing.Optional[_types.JsonDict] = None,
-            nonce: typing.Optional[int] = None,
-            allowed_mentions: typing.Optional[_types.JsonDict] = None,
-            message_reference: typing.Optional[_types.JsonDict] = None,
+        self,
+        channel_id: Snowflake,
+        *,
+        params: discord.http.MultipartParameters
     ) -> _types.JsonDict:
         locs = _get_higher_locs(1)
         channel = locs.get("channel", None)
 
+        print(f"meow: {params.payload.get('embeds')}")
+
         embeds = []
-        if embed:
-            embeds = [discord.Embed.from_dict(embed)]
+        if params.payload.get('embeds'):
+            for e in params.payload.get('embeds'):
+                embeds.append(discord.Embed.from_dict(e))
         user = self.state.user
         if hasattr(channel, "guild"):
             perm = channel.permissions_for(channel.guild.get_member(user.id))
@@ -171,7 +170,12 @@ class FakeHttp(dhttp.HTTPClient):
             raise discord.errors.Forbidden(FakeRequest(403, "missing send_messages"), "send_messages")
 
         message = make_message(
-            channel=channel, author=self.state.user, content=content, tts=tts, embeds=embeds, nonce=nonce
+            channel=channel,
+            author=self.state.user,
+            content=params.payload.get('content'),
+            tts=params.payload.get('tts'),
+            embeds=embeds,
+            nonce=params.payload.get('nonce')
         )
 
         await callbacks.dispatch_event("send_message", message)
