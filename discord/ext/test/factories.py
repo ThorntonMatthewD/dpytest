@@ -387,9 +387,9 @@ def make_message_dict(
         'attachments': attachments,
         'embeds': embeds,
         'pinned': pinned,
-        'type': type
+        'type': type,
     }
-    items = ('guild_id', 'member', 'reactions', 'nonce', 'webhook_id', 'activity', 'application')
+    items = ('guild_id', 'member', 'reactions', 'nonce', 'webhook_id', 'activity')
     _fill_optional(out, kwargs, items)
     return out
 
@@ -425,7 +425,7 @@ def dict_from_message(message: discord.Message) -> _types.JsonDict:
         'attachments': list(map(dict_from_attachment, message.attachments)),
     }
 
-    items = ('content', 'pinned', 'application', 'activity',
+    items = ('content', 'pinned', 'activity',
              'mention_everyone', 'tts', 'type', 'nonce')
     _fill_optional(out, message, items)
     return out
